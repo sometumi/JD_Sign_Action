@@ -1,0 +1,30 @@
+name: Merge upstream branches
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Merge upstream
+        run: |
+          git config --global user.name 'robot'
+          git config --global user.email 'robot@gmail.com'
+          git pull --unshallow
+          # 添加一个将被同步给 fork 远程的上游仓库
+          git remote add upstream https://github.com/ZHDeveloper/JD_Sign_Action.git
+          # 从上游仓库 fetch 分支和提交点，传送到本地，并会被存储在一个本地分支 upstream/master
+          git fetch upstream
+
+          # 切换到本地主分
+          git checkout main
+
+          # 把 upstream/master 分支合并到本地 master 上，这样就完成了同步，并且不会丢掉本地修改的内容
+          git merge --no-edit upstream/main
+          git push origin main
+
+          #sync tag
+          git fetch upstream --tags
+          git push --tags
+          # etc
